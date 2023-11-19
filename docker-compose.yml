@@ -1,0 +1,10 @@
+version: '3'
+services:
+  db:
+    build: database/
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+  app:
+    build: app/
+    depends_on:
+      - db

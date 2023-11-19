@@ -1,0 +1,1 @@
+ CREATE TABLE myImg (id CHAR(6) PRIMARY KEY, name CHAR(20) NOT NULL, file BLOB);
