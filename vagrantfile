@@ -14,22 +14,34 @@ Vagrant.configure("2") do |config|
     # copiamos la carpeta de los estáticos dentro de la máquina. 
     # Para usar rsync, tiene que estar instalado en el host
     # https://learn.microsoft.com/en-us/windows/wsl/install
-
+    config.ssh.username = "vagrant"
+    config.ssh.password = "vagrant"
+    config.ssh.insert_key = "true"
+    
     # install docker and docker-compose
     config.vm.provision :docker
     config.vm.provision :docker_compose
 
     config.vm.provision "shell", inline: <<-SHELL
-      sudo docker run -d \
-          --name mysql-container \
-          -e MYSQL_ROOT_PASSWORD=root_password \
-          -e MYSQL_DATABASE=mydb \
-          -e MYSQL_USER=user \
-          -e MYSQL_PASSWORD=user_password \
-          -p 3306:3306 \
-          mysql:latest
-    
-        # Wait for MySQL to start
-    
-    SHELL
+    sudo docker run -d \
+      --name mysql-container \
+      -e MYSQL_ROOT_PASSWORD=root_password \
+      -e MYSQL_DATABASE=mydb \
+      -e MYSQL_USER=user \
+      -e MYSQL_PASSWORD=user_password \
+      -p 3306:3306 \
+      mysql:latest
+
+    # Wait for MySQL to start
+    sleep 10
+
+    # Create the myImg table in the mydb database
+    sudo docker exec -i mysql-container mysql -uroot -proot_password mydb <<-SQL
+      CREATE TABLE myImg (
+        id CHAR(6) PRIMARY KEY,
+        name CHAR(20) NOT NULL,
+        file BLOB
+      );
+    SQL
+  SHELL
   end
