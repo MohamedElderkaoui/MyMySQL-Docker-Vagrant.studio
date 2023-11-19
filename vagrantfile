@@ -1,42 +1,35 @@
-# Vagrantfile
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
 
 Vagrant.configure("2") do |config|
-    # Define the virtual machine
-    config.vm.box = "ubuntu/bionic64"
-    config.vm.network "forwarded_port", guest: 3306, host: 3306
-  
-    # Disable default SSH configuration
-    config.ssh.insert_key = false
-    config.vm.provision "null"
-  
-    # Provision the virtual machine with Docker and MySQL setup
+    config.vm.box = "bento/ubuntu-22.04"
+    # puertos host y máquina virtualizada
+    #config.vm.network :forwarded_port, host: 8080, guest: 80
+    
+    # config.vm.synced_folder './', '/vagrant', SharedFoldersEnableSymlinksCreate: false
+    # require plugin https://github.com/leighmcculloch/vagrant-docker-compose
+    config.vagrant.plugins = "vagrant-docker-compose"
+    
+    # copiamos la carpeta de los estáticos dentro de la máquina. 
+    # Para usar rsync, tiene que estar instalado en el host
+    # https://learn.microsoft.com/en-us/windows/wsl/install
+
+    # install docker and docker-compose
+    config.vm.provision :docker
+    config.vm.provision :docker_compose
+
     config.vm.provision "shell", inline: <<-SHELL
-      # Install Docker
-      sudo apt-get update
-      sudo apt-get install -y docker.io
-  
-      # Start the MySQL container
       sudo docker run -d \
-        --name mysql-container \
-        -e MYSQL_ROOT_PASSWORD=root_password \
-        -e MYSQL_DATABASE=mydb \
-        -e MYSQL_USER=user \
-        -e MYSQL_PASSWORD=user_password \
-        -p 3306:3306 \
-        mysql:latest
-  
-      # Wait for MySQL to start
-      sleep 10
-  
-      # Create the 'myImg' table
-      sudo docker exec -i mysql-container mysql -uroot -proot_password mydb <<EOF
-        CREATE TABLE myImg (
-          id CHAR(6) PRIMARY KEY,
-          name CHAR(20) NOT NULL,
-          file BLOB
-        );
-  EOF
-  
+          --name mysql-container \
+          -e MYSQL_ROOT_PASSWORD=root_password \
+          -e MYSQL_DATABASE=mydb \
+          -e MYSQL_USER=user \
+          -e MYSQL_PASSWORD=user_password \
+          -p 3306:3306 \
+          mysql:latest
+    
+        # Wait for MySQL to start
+    
     SHELL
   end
-  
