@@ -33,6 +33,9 @@ Vagrant.configure("2") do |config|
       mysql:latest
 
     # Wait for MySQL to start
+    # docker exec -t -i mysql-container /bin/bash
+
+    #docker exec mysql-container mysql -u user -puser_password -e "drop schema test; create schema test;"
     sleep 10
 
     # Create the myImg table in the mydb database
